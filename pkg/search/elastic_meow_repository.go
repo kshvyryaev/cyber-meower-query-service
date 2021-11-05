@@ -13,6 +13,18 @@ import (
 
 const _meowIndex = "meows"
 
+type elasticSearchMeowResponse struct {
+	Took int64
+	Hits struct {
+		Total struct {
+			Value int64
+		}
+		Hits []*struct {
+			Source domain.Meow `json:"_source"`
+		}
+	}
+}
+
 type ElasticMeowRepository struct {
 	client *elasticsearch.Client
 }
@@ -53,19 +65,7 @@ func (repository *ElasticMeowRepository) Search(query string, skip int, take int
 }
 
 func (repository *ElasticMeowRepository) getSerachResponse(response *esapi.Response) ([]domain.Meow, error) {
-	type Response struct {
-		Took int64
-		Hits struct {
-			Total struct {
-				Value int64
-			}
-			Hits []*struct {
-				Source domain.Meow `json:"_source"`
-			}
-		}
-	}
-
-	responseBody := Response{}
+	responseBody := elasticSearchMeowResponse{}
 	if err := json.NewDecoder(response.Body).Decode(&responseBody); err != nil {
 		return nil, err
 	}
