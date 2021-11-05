@@ -10,8 +10,12 @@ type Config struct {
 }
 
 func ProvideConfig() *Config {
-	return &Config{
+	config := &Config{
 		Port:           *flag.String("port", "8090", "Server port"),
 		ElasticAddress: *flag.String("elasticAddress", "http://127.0.0.1:9200", "Elastic search address"),
 	}
+
+	flag.Parse()
+
+	return config
 }
