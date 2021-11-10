@@ -9,28 +9,29 @@ package di
 import (
 	"github.com/kshvyryaev/cyber-meower-query-service/pkg"
 	"github.com/kshvyryaev/cyber-meower-query-service/pkg/controller/http"
-	"github.com/kshvyryaev/cyber-meower-query-service/pkg/query"
+	"github.com/kshvyryaev/cyber-meower-query-service/pkg/controller/http/middleware"
 	"github.com/kshvyryaev/cyber-meower-query-service/pkg/search"
+	"github.com/kshvyryaev/cyber-meower-query-service/pkg/usecase"
 )
 
 // Injectors from wire.go:
 
-func InitializeHttpServer() (*controller.HttpServer, func(), error) {
+func InitializeHttpServer() (*http.HttpServer, func(), error) {
 	config := pkg.ProvideConfig()
 	client, err := search.ProvideElastic(config)
 	if err != nil {
 		return nil, nil, err
 	}
 	elasticMeowRepository := search.ProvideElasticMeowRepository(client)
-	meowQueries := query.ProvideMeowQueries(elasticMeowRepository)
-	meowController := controller.ProvideMeowController(meowQueries)
+	meowUsecase := usecase.ProvideMeowUsecase(elasticMeowRepository)
+	meowController := http.ProvideMeowController(meowUsecase)
 	logger, cleanup, err := pkg.ProvideZap()
 	if err != nil {
 		return nil, nil, err
 	}
-	errorHandlerMiddleware := controller.ProvideErrorHandlerMiddleware(logger)
-	recoveryHandlerMiddleware := controller.ProvideRecoveryHandlerMiddleware(logger)
-	httpServer := controller.ProvideHttpServer(config, meowController, errorHandlerMiddleware, recoveryHandlerMiddleware)
+	errorHandlerMiddleware := middleware.ProvideErrorHandlerMiddleware(logger)
+	recoveryHandlerMiddleware := middleware.ProvideRecoveryHandlerMiddleware(logger)
+	httpServer := http.ProvideHttpServer(config, meowController, errorHandlerMiddleware, recoveryHandlerMiddleware)
 	return httpServer, func() {
 		cleanup()
 	}, nil

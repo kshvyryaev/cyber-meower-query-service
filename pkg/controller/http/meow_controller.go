@@ -1,19 +1,21 @@
-package controller
+package http
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kshvyryaev/cyber-meower-query-service/pkg/query"
+	"github.com/kshvyryaev/cyber-meower-query-service/pkg/contract"
+	"github.com/kshvyryaev/cyber-meower-query-service/pkg/controller/http/request"
+	"github.com/kshvyryaev/cyber-meower-query-service/pkg/controller/http/response"
 )
 
 type MeowController struct {
-	meowQueries *query.MeowQueries
+	usecase contract.MeowUsecase
 }
 
-func ProvideMeowController(meowQueries *query.MeowQueries) *MeowController {
+func ProvideMeowController(usecase contract.MeowUsecase) *MeowController {
 	return &MeowController{
-		meowQueries: meowQueries,
+		usecase: usecase,
 	}
 }
 
@@ -25,7 +27,7 @@ func (controller *MeowController) Route(router *gin.Engine) {
 }
 
 func (controller *MeowController) Search(context *gin.Context) {
-	request := query.SearchRequest{
+	request := request.SearchRequest{
 		Query: "",
 		Skip:  0,
 		Take:  20,
@@ -36,11 +38,20 @@ func (controller *MeowController) Search(context *gin.Context) {
 		return
 	}
 
-	response, err := controller.meowQueries.Search(&request)
+	meows, err := controller.usecase.Search(request.Query, request.Skip, request.Take)
 	if err != nil {
 		context.Error(err)
 		return
 	}
 
-	context.JSON(http.StatusOK, response)
+	responses := make([]response.MeowResponse, 0, len(meows))
+	for _, meow := range meows {
+		responses = append(responses, response.MeowResponse{
+			ID:        meow.ID,
+			Body:      meow.Body,
+			CreatedOn: meow.CreatedOn,
+		})
+	}
+
+	context.JSON(http.StatusOK, responses)
 }

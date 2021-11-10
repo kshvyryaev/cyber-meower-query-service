@@ -1,9 +1,10 @@
-package controller
+package middleware
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/kshvyryaev/cyber-meower-query-service/pkg/controller/http/response"
 	"go.uber.org/zap"
 )
 
@@ -23,7 +24,7 @@ func (handler *ErrorHandlerMiddleware) Handle() gin.HandlerFunc {
 
 		if len(context.Errors) > 0 {
 			err := context.Errors[0].Err
-			context.AbortWithStatusJSON(http.StatusInternalServerError, ErrorResponse{Message: err.Error()})
+			context.AbortWithStatusJSON(http.StatusInternalServerError, response.ErrorResponse{Message: err.Error()})
 
 			handler.logger.Error("error happend: " + err.Error())
 		}

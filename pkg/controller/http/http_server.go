@@ -1,22 +1,23 @@
-package controller
+package http
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/kshvyryaev/cyber-meower-query-service/pkg"
+	"github.com/kshvyryaev/cyber-meower-query-service/pkg/controller/http/middleware"
 )
 
 type HttpServer struct {
 	config                    *pkg.Config
 	meowController            *MeowController
-	errorHandlerMiddleware    *ErrorHandlerMiddleware
-	recoveryHandlerMiddleware *RecoveryHandlerMiddleware
+	errorHandlerMiddleware    *middleware.ErrorHandlerMiddleware
+	recoveryHandlerMiddleware *middleware.RecoveryHandlerMiddleware
 }
 
 func ProvideHttpServer(
 	config *pkg.Config,
 	meowController *MeowController,
-	errorHandlerMiddleware *ErrorHandlerMiddleware,
-	recoveryHandlerMiddleware *RecoveryHandlerMiddleware) *HttpServer {
+	errorHandlerMiddleware *middleware.ErrorHandlerMiddleware,
+	recoveryHandlerMiddleware *middleware.RecoveryHandlerMiddleware) *HttpServer {
 	return &HttpServer{
 		config:                    config,
 		meowController:            meowController,

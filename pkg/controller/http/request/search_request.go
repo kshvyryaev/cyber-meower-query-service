@@ -1,4 +1,4 @@
-package query
+package request
 
 type SearchRequest struct {
 	Query string `form:"query"`
