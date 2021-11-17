@@ -1,21 +1,20 @@
 package pkg
 
 import (
-	"flag"
+	"github.com/kelseyhightower/envconfig"
+	"github.com/pkg/errors"
 )
 
 type Config struct {
-	Port           string
-	ElasticAddress string
+	Port           string `envconfig:"PORT"`
+	ElasticAddress string `envconfig:"ELASTIC_ADDRESS"`
 }
 
-func ProvideConfig() *Config {
-	config := &Config{
-		Port:           *flag.String("port", "8090", "Server port"),
-		ElasticAddress: *flag.String("elasticAddress", "http://127.0.0.1:9200", "Elastic search address"),
+func ProvideConfig() (*Config, error) {
+	var config Config
+	err := envconfig.Process("", &config)
+	if err != nil {
+		return nil, errors.Wrap(err, "config")
 	}
-
-	flag.Parse()
-
-	return config
+	return &config, nil
 }

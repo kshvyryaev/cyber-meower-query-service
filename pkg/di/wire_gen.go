@@ -17,7 +17,10 @@ import (
 // Injectors from wire.go:
 
 func InitializeHttpServer() (*http.HttpServer, func(), error) {
-	config := pkg.ProvideConfig()
+	config, err := pkg.ProvideConfig()
+	if err != nil {
+		return nil, nil, err
+	}
 	client, err := search.ProvideElastic(config)
 	if err != nil {
 		return nil, nil, err
